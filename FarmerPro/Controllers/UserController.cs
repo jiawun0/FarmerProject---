@@ -190,6 +190,10 @@ namespace FarmerPro.Controllers
                     }
                     else
                     {
+                        // GenerateToken() 生成新 JwtToken 用法
+                        JwtAuthUtil jwtAuthUtil = new JwtAuthUtil();
+                        string jwtToken = jwtAuthUtil.GenerateToken(IsUser.Id, IsUser.Category);
+                       
                         var result = new
                         {
                             statusCode = 200,
@@ -207,11 +211,11 @@ namespace FarmerPro.Controllers
                                 phone = IsUser.Phone,
                                 sex = IsUser.Sex,
                                 vision = IsUser.Vision,
-                                description = IsUser.Description
+                                description = IsUser.Description,
+                                token = jwtToken  // 登入成功時，回傳登入成功順便夾帶 JwtToken
                             }
                         };
                         return Content(HttpStatusCode.OK, result);
-
                     }
                 }
             }

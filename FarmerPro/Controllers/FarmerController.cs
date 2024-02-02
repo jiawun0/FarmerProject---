@@ -19,6 +19,7 @@ namespace FarmerPro.Controllers
         #region BFP-02 新增小農單一商品資料(不包含上傳相片)
         [HttpPost]
         [Route("/api/farmer/product")]
+        [JwtAuthFilter]
         public IHttpActionResult CreateProduct([FromBody] CreateProduct CreateProduct)
         {
             try
@@ -140,5 +141,9 @@ namespace FarmerPro.Controllers
             }
         }
         #endregion
+    }
+
+    internal class JwtAuthFilterAttribute : Attribute
+    {
     }
 }
