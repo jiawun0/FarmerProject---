@@ -115,3 +115,11 @@ C:\Users\88691\source\repos\FarmerPro\FarmerPro\obj\Debug\FarmerPro.Migrations.a
 C:\Users\88691\source\repos\FarmerPro\FarmerPro\obj\Debug\FarmerPro.Migrations.addLiveSet.resources
 C:\Users\88691\source\repos\FarmerPro\FarmerPro\obj\Debug\FarmerPro.Migrations.addchatcart.resources
 C:\Users\88691\source\repos\FarmerPro\FarmerPro\obj\Debug\FarmerPro.Migrations.addspecsale.resources
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.csproj.AssemblyReference.cache
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.Migrations.inituser.resources
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.Migrations.addproandspec.resources
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.Migrations.addLiveSet.resources
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.Migrations.addchatcart.resources
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.Migrations.addspecsale.resources
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.csproj.GenerateResource.cache
+C:\Users\user\Desktop\FProj\FarmerProject---\FarmerPro\obj\Debug\FarmerPro.csproj.CoreCompileInputs.cache
