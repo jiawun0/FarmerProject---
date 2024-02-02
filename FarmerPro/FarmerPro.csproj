@@ -234,6 +234,8 @@
     <Compile Include="Models\ViewModel\CreateProduct.cs" />
     <Compile Include="Models\ViewModel\Register.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Securities\JwtAuthFilter.cs" />
+    <Compile Include="Securities\JwtAuthUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

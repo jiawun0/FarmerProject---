@@ -1,7 +1,7 @@
 ﻿using FarmerPro.Models;
 using FarmerPro.Models.ViewModel;
+using FarmerPro.Securities;
 using Konscious.Security.Cryptography;
-using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -192,14 +192,13 @@ namespace FarmerPro.Controllers
                     {
                         // GenerateToken() 生成新 JwtToken 用法
                         JwtAuthUtil jwtAuthUtil = new JwtAuthUtil();
-                        string jwtToken = jwtAuthUtil.GenerateToken(IsUser.Id, IsUser.Category);
+                        string jwtToken = jwtAuthUtil.GenerateToken(IsUser.Id, (int)IsUser.Category);
                        
                         var result = new
                         {
                             statusCode = 200,
                             status = "success",
                             message = "登入成功", // token失效時間:一天
-                            token = "HELLO,this is TOKEN FROM BackEND",
                             data = new
                             {
                                 id = IsUser.Id,
