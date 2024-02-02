@@ -1,13 +1,13 @@
-﻿using FarmerPro.Models;
-using Jose;
+﻿using Jose;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Configuration;
+using FarmerPro.Models;
 
-namespace FarmerPro.Security
+namespace FarmerPro.Securities
 {
     /// <summary>
     /// JwtToken 生成功能
@@ -85,4 +85,3 @@ namespace FarmerPro.Security
             return "";
         }
     }
-}
