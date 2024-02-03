@@ -245,7 +245,8 @@ namespace FarmerPro.Controllers
         //UserId= FarmerId,//要再User Model加入一個UserId，才能鏈結!!!
                 };
                 db.Albums.Add(newalbum);
-                int AlbumId=db.SaveChanges();
+                db.SaveChanges();
+                int AlbumId = newalbum.Id;
 
                 // 檢查資料夾是否存在，若無則建立
                 string root = HttpContext.Current.Server.MapPath($"~/upload/farmer/{FarmerId}/{AlbumId}"); //建立假的ID

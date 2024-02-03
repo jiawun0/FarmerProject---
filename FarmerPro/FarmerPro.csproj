@@ -195,6 +195,7 @@
     <Compile Include="Controllers\FarmerController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LiveController.cs" />
+    <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
@@ -237,6 +238,7 @@
     <Compile Include="Models\Record.cs" />
     <Compile Include="Models\Spec.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Models\ViewModel\CreateNewOrder.cs" />
     <Compile Include="Models\ViewModel\CreateProduct.cs" />
     <Compile Include="Models\ViewModel\Register.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
