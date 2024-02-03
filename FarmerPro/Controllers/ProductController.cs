@@ -44,13 +44,15 @@ namespace FarmerPro.Controllers
                                       productTitle = p.ProductTitle,
                                       smallOriginalPrice = s.Price,
                                       smallPromotionPrice = s.PromotePrice,
-                                      productImg = new 
+                                      productImg = new
                                       {
                                           src = photo != null ? photo.URL : "default-src",
-                                          alt = p.ProductTitle 
+                                          alt = p.ProductTitle
                                       }
 
                                   };
+
+
 
                 if (!productInfo.Any())
                 {
@@ -65,7 +67,7 @@ namespace FarmerPro.Controllers
                 }
                 else
                 {
-                    
+
                     // result 訊息
                     var result = new
                     {
