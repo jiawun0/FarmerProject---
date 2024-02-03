@@ -35,7 +35,7 @@ namespace FarmerPro.Controllers
                 var productInfo = from p in db.Products
                                   join s in db.Specs on p.Id equals s.ProductId
                                   from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
-                                  from photo in db.Photos.Where(ph => album != null && album.Id == ph.AlbumId).DefaultIfEmpty()
+                                  let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
                                   where p.ProductState && !s.Size // 確認p.ProductState = true && s.Size = false
                                   orderby p.CreatTime descending
                                   select new
