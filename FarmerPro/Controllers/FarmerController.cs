@@ -8,6 +8,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using FarmerPro.Models;
 using FarmerPro.Models.ViewModel;
+using FarmerPro.Securities;
+using System.Web.Http.Controllers;
+using System.Data.Entity.Migrations.Model;
 
 
 namespace FarmerPro.Controllers
@@ -16,11 +19,76 @@ namespace FarmerPro.Controllers
     {
         private FarmerProDB db = new FarmerProDB();
 
+
+        #region BFP-01 取得小農單一商品資料(有包含相片)
+        [HttpGet]
+        [Route("api/farmer/product")]
+        [JwtAuthFilter]
+        public IHttpActionResult GetSingleFarmerProduct([FromUri] int productId)
+        {
+            try
+            {
+                //先驗證取得小農ID和產品ID
+                var HttpActionContext = new HttpActionContext();
+                var request = HttpActionContext.Request;  //沒有用到
+                int farmerId = Convert.ToInt16(JwtAuthFilter.GetToken(request.Headers.Authorization.Parameter)["Id"]); 
+                var SingleProduct = db.Products.Where(x => x.Id == productId).FirstOrDefault();
+                var SingleProductLarge = db.Specs.Where(x => x.Size == true && x.ProductId == SingleProduct.Id).FirstOrDefault();
+                var SingleProductSmall = db.Specs.Where(x => x.Size == false && x.ProductId == SingleProduct.Id).FirstOrDefault();
+                var ProductPhoto = db.Albums.Where(x => x.ProductId == SingleProduct.Id).FirstOrDefault().Photo;
+
+                var result = new
+                {
+                    statusCode = 200,
+                    status = "success",
+                    message = "取得成功",
+                    data = new
+                    {
+                        productId = SingleProduct.Id,
+                        productTitle = SingleProduct.ProductTitle,
+                        category = SingleProduct.Category,
+                        period = SingleProduct.Period,
+                        origin = SingleProduct.Origin,
+                        storage = SingleProduct.Storage,
+                        description = SingleProduct.Description,
+                        introduction = SingleProduct.Introduction,
+                        productState = SingleProduct.ProductState,
+                        largeOriginalPrice = SingleProductLarge.Price,
+                        largePromotionPrice = SingleProductLarge.PromotePrice,
+                        largeWeight = SingleProductLarge.Weight,
+                        largeStock = SingleProductLarge.Stock,
+                        smallOriginalPrice = SingleProductSmall.Price,
+                        smallPromotionPrice = SingleProductSmall.PromotePrice,
+                        smallWeight = SingleProductSmall.Weight,
+                        smallStock = SingleProductSmall.Stock,
+                        photos = ProductPhoto.Select(pic => new
+                        {
+                            src = pic.URL,
+                            alt = SingleProduct.ProductTitle.ToString() + pic.Id.ToString(),
+                        }).ToList(),
+                    }
+                };
+                return Content(HttpStatusCode.OK, result);
+            }
+            catch 
+            {
+                var result = new
+                {
+                    statusCode = 500,
+                    status = "error",
+                    message = "其他錯誤",
+                };
+                return Content(HttpStatusCode.OK, result);
+            }
+        }
+
+        #endregion
+
         #region BFP-02 新增小農單一商品資料(不包含上傳相片)
         [HttpPost]
         [Route("api/farmer/product")]
         [JwtAuthFilter]
-        public IHttpActionResult CreateProduct([FromBody] CreateProduct CreateProduct)
+        public IHttpActionResult CreateSingleFarmerProduct([FromBody] CreateProduct CreateProduct)
         {
             try
             {
@@ -143,7 +211,7 @@ namespace FarmerPro.Controllers
         #endregion
     }
 
-    internal class JwtAuthFilterAttribute : Attribute
-    {
-    }
+    //internal class JwtAuthFilterAttribute : Attribute
+    //{
+    //}
 }
