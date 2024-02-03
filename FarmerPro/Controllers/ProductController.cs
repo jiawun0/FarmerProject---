@@ -52,7 +52,7 @@ namespace FarmerPro.Controllers
 
                                   };
 
-                if (productInfo.FirstOrDefault() == null)
+                if (!productInfo.Any())
                 {
                     //result訊息
                     var result = new
@@ -65,6 +65,7 @@ namespace FarmerPro.Controllers
                 }
                 else
                 {
+                    
                     // result 訊息
                     var result = new
                     {
