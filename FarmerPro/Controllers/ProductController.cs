@@ -33,25 +33,23 @@ namespace FarmerPro.Controllers
             {
                 //取得Product、Spec、Album、Photo的聯合資料
                 var productInfo = from p in db.Products
-                                  join s in db.Specs on p.Id equals s.ProductId into productSpecs
-                                  from spec in productSpecs.DefaultIfEmpty()
-                                  join a in db.Albums on p.Id equals a.ProductId into productAlbums
-                                  from album in productAlbums.DefaultIfEmpty()
-                                  join ph in db.Photos on album.Id equals ph.AlbumId into albumPhotos
-                                  from photo in albumPhotos.DefaultIfEmpty()
-                                  where p.ProductState && !spec.Size //p.ProductState = true && spec.Size = false
+                                  join s in db.Specs on p.Id equals s.ProductId
+                                  from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
+                                  from photo in db.Photos.Where(ph => album != null && album.Id == ph.AlbumId).DefaultIfEmpty()
+                                  where p.ProductState && !s.Size // 確認p.ProductState = true && s.Size = false
                                   orderby p.CreatTime descending
                                   select new
                                   {
-                                      product_Id = p.Id,
+                                      productId = p.Id,
                                       productTitle = p.ProductTitle,
-                                      price = spec.Price,
-                                      promotePrice =spec.PromotePrice,
-                                      productImg = new
+                                      smallOriginalPrice = s.Price,
+                                      smallPromotionPrice = s.PromotePrice,
+                                      productImg = new 
                                       {
-                                          src = photo.URL,
-                                          alt = $"{p.ProductTitle}{photo.Id}"
+                                          src = photo != null ? photo.URL : "default-src",
+                                          alt = p.ProductTitle 
                                       }
+
                                   };
 
                 if (productInfo.FirstOrDefault() == null)
@@ -96,46 +94,28 @@ namespace FarmerPro.Controllers
     public class GetAllProduct
     {
         [Display(Name = "商品編號")]
-        public int product_Id { get; set; }
+        public int productId { get; set; }
 
         [Display(Name = "農產品名稱")]
         public string productTitle { get; set; }
 
-        [Display(Name = "上架狀態")]
-        public bool productState { get; set; } = false;
-
-        [Display(Name = "上架時間")]
-        public DateTime? updateStateTime { get; set; }
-
-        [Display(Name = "建立時間")]
-        public DateTime creatTime { get; set; } = DateTime.Now;
-
         [Display(Name = "原價")]
-        public int price { get; set; }
+        public int smallOriginalPrice { get; set; }
 
         [Display(Name = "促銷價")]
-        public int? promotePrice { get; set; }
-
-        [Display(Name = "規格大小")]
-        public bool size { get; set; }
-
-        [Display(Name = "商品Id")]
-        public int productId { get; set; }
+        public int? smallPromotionPrice { get; set; }
 
         [Display(Name = "相簿編號")]
         public int album_Id { get; set; }
 
-        [Display(Name = "相片路徑")]
+        [Display(Name = "相片路徑物件")]
         public string productImg { get; set; }
 
-        [Display(Name = "相簿Id")]
-        public int albumId { get; set; }
-
-        [Display(Name = "相片編號")]
-        public int photo_Id { get; set; }
+        [Display(Name = "相片路徑")]
+        public string src { get; set; }
 
         [Display(Name = "相片alt")]
-        public int alt { get; set; }
+        public string alt { get; set; }
     }
 }
 
