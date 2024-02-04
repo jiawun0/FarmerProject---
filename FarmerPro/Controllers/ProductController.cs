@@ -405,7 +405,7 @@ namespace FarmerPro.Controllers
                         message = "取得成功",
                         data = new
                         {
-                            detailProduct = detailProduct.ToList(),
+                            detailProduct = detailProduct.FirstOrDefault(),
                             productInfoByUser = productInfoByUser.ToList(),
                         }
                     };
