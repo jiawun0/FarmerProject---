@@ -98,6 +98,7 @@ namespace FarmerPro.Controllers
         [HttpGet]
         //自定義路由
         [Route("api/product/liveProduct")]
+        ///api/product?(liveqty=3)&(topsalesqty)&(promoteqty=6)&(fruitqyt)&(vegatqty)
         //使用 IHttpActionResult 作為返回 HTTP 回應類型
 
         public IHttpActionResult productindex()
@@ -116,14 +117,17 @@ namespace FarmerPro.Controllers
                 };
 
                 var latestLiveSets = (from livesetDate in db.LiveSettings
-                                      orderby livesetDate.LiveDate descending
-                                      group livesetDate by livesetDate.UserId into g
-                                      select g.Take(3)).SelectMany(ls => ls).ToList();
+                                      where livesetDate.LiveDate >= DateTime.Today
+                                      orderby livesetDate.LiveDate ascending
+                                      select livesetDate)
+                                      .Take(3)
+                                      .ToList();
 
                 var liveProduct = from p in db.Products
                                   join user in db.Users on p.UserId equals user.Id
                                   join s in db.Specs on p.Id equals s.ProductId
-                                  from livepro in db.LiveProducts.Where(lp => p.Id == lp.SpecId).DefaultIfEmpty()
+                                  join livepro in db.LiveProducts on s.Id equals livepro.SpecId
+                                  //join liveset in latestLiveSets on livepro.LiveSettingId equals liveset.Id
                                   from liveset in db.LiveSettings.Where(ls => user.Id == ls.UserId).DefaultIfEmpty()
                                   from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
                                   let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
@@ -167,39 +171,6 @@ namespace FarmerPro.Controllers
                                              alt = p.ProductTitle
                                          },
                                      };
-
-                var promotionProduct = from p in db.Products
-                                       join user in db.Users on p.UserId equals user.Id
-                                       join s in db.Specs on p.Id equals s.ProductId
-                                       from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
-                                       let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
-                                       where p.ProductState && s != null && s.LivePrice.HasValue && s.LivePrice.Value != 0
-                                       orderby p.CreatTime descending
-                                       select new
-                                       {
-                                           productId = p.Id,
-                                           productTitle = p.ProductTitle,
-                                           farmerName = user.NickName,
-                                           origin = p.Origin,
-                                           smallOriginalPrice = s.Price,
-                                           smallPromotionPrice = s.PromotePrice,
-                                           productImg = new
-                                           {
-                                               src = photo != null ? photo.URL : "default-src",
-                                               alt = p.ProductTitle
-                                           },
-                                           farmerImg = new
-                                           {
-                                               src = user.Photo != null ? user.Photo : "default-src",
-                                               alt = user.NickName
-                                           }
-                                       };
-
-                // 执行查询并将结果转换为列表
-                var promotionProducts = promotionProduct.ToList();
-
-                // 在内存中随机排序并取前四条记录
-                var randomPromotionProducts = promotionProducts.OrderBy(x => Guid.NewGuid()).Take(4).ToList();
 
 
 
