@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity;
 using System.Drawing;
 using System.Linq;
 using System.Net;
@@ -97,11 +98,12 @@ namespace FarmerPro.Controllers
         #region FGP-2 取得live產品、熱銷產品、特價促銷產品、水果產品、蔬菜產品
         [HttpGet]
         //自定義路由
-        [Route("api/product/productIndex")]
-        ///api/product?(liveqty=3)&(topsalesqty)&(promoteqty=6)&(fruitqyt)&(vegatqty)
+        [Route("api/product")]
+        //[Route("api/product/{liveqty}/{topsalesqty}/{promoteqty}/{fruitqyt}/{vegatqty}")]
+        ///api/product?(liveqty=3)&(topsalesqty=6)&(promoteqty=4)&(fruitqyt)&(vegatqty)
         //使用 IHttpActionResult 作為返回 HTTP 回應類型
 
-        public IHttpActionResult productindex()
+        public IHttpActionResult productindex(int liveqty = 3, int topsalesqty = 6, int promoteqty = 4, int fruitqty = 3, int vegatqty = 3)
         {
             try
             {
@@ -120,7 +122,7 @@ namespace FarmerPro.Controllers
                                       where livesetDate.LiveDate >= DateTime.Today
                                       orderby livesetDate.LiveDate ascending
                                       select livesetDate)
-                                      .Take(3)
+                                      .Take(liveqty)
                                       .ToList();
 
                 var liveProduct = from p in db.Products
@@ -152,7 +154,7 @@ namespace FarmerPro.Controllers
                                       }
                                   };
 
-                var hotSaleProduct = from p in db.Products
+                var topSaleProduct = (from p in db.Products
                                      join s in db.Specs on p.Id equals s.ProductId
                                      from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
                                      let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
@@ -170,7 +172,7 @@ namespace FarmerPro.Controllers
                                              src = photo != null ? photo.URL : "default-src",
                                              alt = p.ProductTitle
                                          },
-                                     };
+                                     }).Take(topsalesqty);
 
                 var promotionProduct = from p in db.Products
                                        join user in db.Users on p.UserId equals user.Id
@@ -203,7 +205,7 @@ namespace FarmerPro.Controllers
                 var promotionProducts = promotionProduct.ToList();
 
                 // 在内存中随机排序并取前四条记录
-                var randomPromotionProducts = promotionProducts.OrderBy(x => Guid.NewGuid()).Take(4).ToList();
+                var randomPromotionProducts = promotionProducts.OrderBy(x => Guid.NewGuid()).Take(promoteqty).ToList();
 
                 
                 var fruitProduct = from p in db.Products
@@ -228,7 +230,7 @@ namespace FarmerPro.Controllers
                                   };
 
                 var fruitProducts = fruitProduct.ToList();
-                var randomFruitProducts = fruitProducts.OrderBy(x => Guid.NewGuid()).Take(3).ToList();
+                var randomFruitProducts = fruitProducts.OrderBy(x => Guid.NewGuid()).Take(fruitqty).ToList();
 
                 var vegetableProduct = from p in db.Products
                                    join s in db.Specs on p.Id equals s.ProductId
@@ -252,7 +254,7 @@ namespace FarmerPro.Controllers
                                    };
 
                 var vegetableProducts = vegetableProduct.ToList();
-                var randomVegetableProducts = vegetableProducts.OrderBy(x => Guid.NewGuid()).Take(3).ToList();
+                var randomVegetableProducts = vegetableProducts.OrderBy(x => Guid.NewGuid()).Take(vegatqty).ToList();
 
 
                 if (!promotionProduct.Any())
@@ -278,7 +280,7 @@ namespace FarmerPro.Controllers
                         data = new
                         {
                             liveProduct = liveProduct.ToList(),
-                            hotSaleProduct = hotSaleProduct.ToList(),
+                            hotSaleProduct = topSaleProduct.ToList(),
                             promotionProduct = promotionProduct.ToList(),
                             fruitProduct = fruitProduct.ToList(),
                             vegetableProduct = vegetableProduct.ToList()
