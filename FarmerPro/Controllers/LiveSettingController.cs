@@ -70,7 +70,6 @@ namespace FarmerPro.Controllers
                     if (specitem != null)
                     {
                         specitem.LivePrice = LP.liveprice;
-
                     }
                 }
                 db.SaveChanges();
@@ -117,6 +116,87 @@ namespace FarmerPro.Controllers
         }
         #endregion
 
+
+        #region BFL-2 修改後台直播資訊(修改產品直播價)
+        [HttpPut]
+        [Route("api/livesetting")]
+        [JwtAuthFilter]
+        public IHttpActionResult ReviseLiveSetting([FromBody] CreateNewLiveSetting input)
+        {
+            // 解密後會回傳 Json 格式的物件 (即加密前的資料)
+            var jwtObject = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int FarmerId = (int)jwtObject["Id"];
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var result = new
+                    {
+                        statusCode = 401,
+                        status = "error",
+                        message = "欄位輸入格式不正確，請重新輸入",
+                    };
+                    return Content(HttpStatusCode.OK, result);
+                }
+
+                var searchLiveSetting = db.LiveSettings.Where(x => x.Id == FarmerId).FirstOrDefault();
+                searchLiveSetting.LiveName = input.liveName;
+                searchLiveSetting.LiveDate = input.liveDate;
+                searchLiveSetting.StartTime = input.startTime;
+                searchLiveSetting.EndTime = input.endTime;
+                searchLiveSetting.YTURL = input.yturl;
+                searchLiveSetting.ShareURL = input.yturl.Substring(input.yturl.LastIndexOf('.')); //這邊可能要改
+                db.SaveChanges();
+                int LiveSettingId = searchLiveSetting.Id;
+
+                for (int i = 0; i < searchLiveSetting.LiveProduct.Count; i++) 
+                {
+                    searchLiveSetting.LiveProduct.ToList()[i].SpecId =
+                        db.Specs.Where(x => x.ProductId == input.liveproudct[i].prodcutId && x.Size == Convert.ToBoolean(input.liveproudct[i].productSize)).FirstOrDefault().Id;
+                }
+                db.SaveChanges();
+
+                var GetUpdateLiveSetting = db.LiveSettings.Where(x => x.Id == FarmerId).FirstOrDefault();
+                var resultReviser = new
+                {
+                    statusCode = 200,
+                    status = "success",
+                    message = "修改成功",
+                    data = new
+                    {
+                        userId = FarmerId,
+                        liveId = GetUpdateLiveSetting.Id,
+                        liveName = GetUpdateLiveSetting.LiveName,
+                        liveDate = GetUpdateLiveSetting.LiveDate.Date,
+                        startTime = GetUpdateLiveSetting.StartTime,
+                        endTime = GetUpdateLiveSetting.EndTime,
+                        //要補上livePic
+                        yturl = GetUpdateLiveSetting.LivePic,
+                        liveproudct = GetUpdateLiveSetting.LiveProduct.Select(x => new
+                        {
+                            productId = db.Specs.Where(y => y.Id == x.SpecId).FirstOrDefault().ProductId,
+                            productName = db.Specs.Where(y => y.Id == x.SpecId).FirstOrDefault().Product.ProductTitle,
+                            productSize = db.Specs.Where(y => y.Id == x.SpecId).FirstOrDefault().Size,
+                            liveprice = db.Specs.Where(y => y.Id == x.SpecId).FirstOrDefault().LivePrice,
+                            liveproductId = x.Id,
+                        }).ToList()
+                    }
+                };
+                return Content(HttpStatusCode.OK, resultReviser);
+            }
+            catch
+            {
+                var result = new
+                {
+                    statusCode = 500,
+                    status = "error",
+                    message = "其他錯誤",
+                };
+                return Content(HttpStatusCode.OK, result);
+            }
+        }
+        #endregion
 
 
         #region BFL-3 取得後台直播資訊(包含產品直播價)
