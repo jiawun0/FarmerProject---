@@ -115,6 +115,11 @@ namespace FarmerPro.Controllers
                     { DayOfWeek.Saturday, "六" }
                 };
 
+                var latestLiveSets = (from livesetDate in db.LiveSettings
+                                      orderby livesetDate.LiveDate descending
+                                      group livesetDate by livesetDate.UserId into g
+                                      select g.Take(3)).SelectMany(ls => ls).ToList();
+
                 var liveProduct = from p in db.Products
                                   join user in db.Users on p.UserId equals user.Id
                                   join s in db.Specs on p.Id equals s.ProductId
@@ -143,9 +148,60 @@ namespace FarmerPro.Controllers
                                       }
                                   };
 
+                var hotSaleProduct = from p in db.Products
+                                     join s in db.Specs on p.Id equals s.ProductId
+                                     from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
+                                     let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
+                                     where p.ProductState && !s.Size // 確認p.ProductState = true && s.Size = false
+                                     orderby s.Sales descending, p.CreatTime descending
+                                     select new
+                                     {
+                                         productId = p.Id,
+                                         productTitle = p.ProductTitle,
+                                         description = p.Description,
+                                         smallOriginalPrice = s.Price,
+                                         smallPromotionPrice = s.PromotePrice,
+                                         productImg = new
+                                         {
+                                             src = photo != null ? photo.URL : "default-src",
+                                             alt = p.ProductTitle
+                                         },
+                                     };
+
+                var promotionProduct = from p in db.Products
+                                       join user in db.Users on p.UserId equals user.Id
+                                       join s in db.Specs on p.Id equals s.ProductId
+                                       from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
+                                       let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
+                                       where p.ProductState && s != null && s.LivePrice.HasValue && s.LivePrice.Value != 0
+                                       orderby p.CreatTime descending
+                                       select new
+                                       {
+                                           productId = p.Id,
+                                           productTitle = p.ProductTitle,
+                                           farmerName = user.NickName,
+                                           origin = p.Origin,
+                                           smallOriginalPrice = s.Price,
+                                           smallPromotionPrice = s.PromotePrice,
+                                           productImg = new
+                                           {
+                                               src = photo != null ? photo.URL : "default-src",
+                                               alt = p.ProductTitle
+                                           },
+                                           farmerImg = new
+                                           {
+                                               src = user.Photo != null ? user.Photo : "default-src",
+                                               alt = user.NickName
+                                           }
+                                       };
+
+                // 执行查询并将结果转换为列表
+                var promotionProducts = promotionProduct.ToList();
+
+                // 在内存中随机排序并取前四条记录
+                var randomPromotionProducts = promotionProducts.OrderBy(x => Guid.NewGuid()).Take(4).ToList();
 
 
-               
 
                 if (!liveProduct.Any())
                 {
@@ -217,7 +273,7 @@ namespace FarmerPro.Controllers
         public string alt { get; set; }
     }
 
-    public class GetLiveProduct
+    public class GetProductIndex
     {
         [Display(Name = "商品編號")]
         public int productId { get; set; }
@@ -245,6 +301,12 @@ namespace FarmerPro.Controllers
 
         [Display(Name = "小農照片物件")]
         public string farmerImg { get; set; }
+
+        [Display(Name = "農產品簡述")]
+        public string description { get; set; }
+
+        [Display(Name = "產地")]
+        public ProductOrigin origin { set; get; }
     }
 }
 
