@@ -458,35 +458,15 @@ namespace FarmerPro.Controllers
                                         },
                                     };
 
-                //取得Product、Spec、Album、Photo的聯合資料
-                var productInfo = from p in db.Products
-                                  join s in db.Specs on p.Id equals s.ProductId
-                                  from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
-                                  let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
-                                  where p.ProductState && !s.Size // 確認p.ProductState = true && s.Size = false
-                                  orderby p.CreatTime descending
-                                  select new
-                                  {
-                                      productId = p.Id,
-                                      productTitle = p.ProductTitle,
-                                      smallOriginalPrice = s.Price,
-                                      smallPromotionPrice = s.PromotePrice,
-                                      productImg = new
-                                      {
-                                          src = photo != null ? photo.URL : "default-src",
-                                          alt = p.ProductTitle
-                                      }
-
-                                  };
-
-                if (!productInfo.Any())
+                if (!searchProduct.Any())
                 {
                     //result訊息
                     var result = new
                     {
                         statusCode = 400,
                         status = "error",
-                        message = "取得失敗",
+                        message = "沒有結果",
+                        data = new object[] { }
                     };
                     return Content(HttpStatusCode.OK, result);
                 }
@@ -499,11 +479,8 @@ namespace FarmerPro.Controllers
                         statusCode = 200,
                         status = "success",
                         message = "取得成功",
-                        data = new
-                        {
-                            searchProduct = searchProduct.ToList(),
-                            productInfo = productInfo.ToList(),
-                        }
+                        data = searchProduct.ToList(),
+
                     };
                     return Content(HttpStatusCode.OK, result);
                 }
