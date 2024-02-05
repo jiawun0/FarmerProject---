@@ -104,7 +104,7 @@ namespace FarmerPro.Controllers
         ///api/product?(topsalesqty=6)&(promoteqty=4)&(fruitqyt)&(vegatqty)
         //使用 IHttpActionResult 作為返回 HTTP 回應類型
 
-        public IHttpActionResult productindex(int topsalesqty = 6, int promoteqty = 4, int fruitqty = 3, int vegatqty = 3)
+        public IHttpActionResult productindex(int topsalesqty = 3, int promoteqty = 4, int fruitqty = 3, int vegatqty = 3)
         {
             try
             {
@@ -451,136 +451,6 @@ namespace FarmerPro.Controllers
             }
         }
         #endregion
-    }
-
-    public class GetAllProduct
-    {
-        [Display(Name = "商品編號")]
-        public int productId { get; set; }
-
-        [Display(Name = "農產品名稱")]
-        public string productTitle { get; set; }
-
-        [Display(Name = "原價")]
-        public int smallOriginalPrice { get; set; }
-
-        [Display(Name = "促銷價")]
-        public int? smallPromotionPrice { get; set; }
-
-        [Display(Name = "相簿編號")]
-        public int album_Id { get; set; }
-
-        [Display(Name = "相片路徑物件")]
-        public string productImg { get; set; }
-
-        [Display(Name = "相片路徑")]
-        public string src { get; set; }
-
-        [Display(Name = "相片alt")]
-        public string alt { get; set; }
-    }
-
-    public class GetProductIndex
-    {
-        [Display(Name = "商品編號")]
-        public int productId { get; set; }
-
-        [Display(Name = "農產品名稱")]
-        public string productTitle { get; set; }
-
-        [Display(Name = "直播價")]
-        public int livePrice { get; set; }
-
-        [Display(Name = "小農姓名")]
-        public int farmerName { get; set; }
-
-        [Display(Name = "直播日期")]
-        public int liveDate { get; set; }
-
-        [Display(Name = "相片路徑物件")]
-        public string productImg { get; set; }
-
-        [Display(Name = "相片路徑")]
-        public string src { get; set; }
-
-        [Display(Name = "相片alt")]
-        public string alt { get; set; }
-
-        [Display(Name = "小農照片物件")]
-        public string farmerImg { get; set; }
-
-        [Display(Name = "農產品簡述")]
-        public string description { get; set; }
-
-        [Display(Name = "產地")]
-        public ProductOrigin origin { set; get; }
-    }
-
-    public class GetProductDetail
-    {
-        [Display(Name = "商品編號")]
-        public int productId { get; set; }
-
-        [Display(Name = "農產品名稱")]
-        public string productTitle { get; set; }
-
-        [Required]
-        [Display(Name = "產品分類")]
-        public ProductCategory category { set; get; }
-
-        [Display(Name = "季節")]
-        public ProductPeriod period { set; get; }
-
-        [Display(Name = "產地")]
-        public ProductOrigin origin { set; get; }
-
-        [Display(Name = "保存方式")]
-        public ProductStorage storage { set; get; }
-
-        [Display(Name = "農產品簡述")]
-        public string productDescription { get; set; }
-
-        [Display(Name = "農產品介紹")]
-        public string introduction { get; set; }
-
-        [Display(Name = "相片路徑物件")]
-        public string productImg { get; set; }
-
-        [Display(Name = "相片路徑")]
-        public string src { get; set; }
-
-        [Display(Name = "相片alt")]
-        public string alt { get; set; }
-
-        [Display(Name = "小農姓名")]
-        public int farmerName { get; set; }
-
-        [Display(Name = "小農照片物件")]
-        public string farmerImg { get; set; }
-
-        [Display(Name = "小農理念")]
-        public string farmerVision { get; set; }
-
-        [Display(Name = "自我介紹")]
-        public string farmerescription { get; set; }
-
-        [Display(Name = "大原價")]
-        public int? largeOriginalPrice { get; set; }
-
-        [Display(Name = "大促銷價")]
-        public int? largePromotionPrice { get; set; }
-
-        [Display(Name = "大規格重量")]
-        public double? largeWeight { get; set; }
-
-        [Display(Name = "小規格重量")]
-        public double? smallWeight { get; set; }
-
-        [Display(Name = "大庫存量")]
-        public int? largeStock { get; set; }
-
-        [Display(Name = "小庫存量")]
-        public int? smallStock { get; set; }
     }
     public class SerchProduct
     {
