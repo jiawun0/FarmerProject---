@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Drawing;
 using System.Linq;
 using System.Net;
@@ -103,57 +104,10 @@ namespace FarmerPro.Controllers
         ///api/product?(liveqty=3)&(topsalesqty=6)&(promoteqty=4)&(fruitqyt)&(vegatqty)
         //使用 IHttpActionResult 作為返回 HTTP 回應類型
 
-        public IHttpActionResult productindex(int liveqty = 3, int topsalesqty = 6, int promoteqty = 4, int fruitqty = 3, int vegatqty = 3)
+        public IHttpActionResult productindex(int topsalesqty = 6, int promoteqty = 4, int fruitqty = 3, int vegatqty = 3)
         {
             try
             {
-                var dayOfWeek = new Dictionary<DayOfWeek, string>
-                {
-                    { DayOfWeek.Sunday, "日" },
-                    { DayOfWeek.Monday, "一" },
-                    { DayOfWeek.Tuesday, "二" },
-                    { DayOfWeek.Wednesday, "三" },
-                    { DayOfWeek.Thursday, "四" },
-                    { DayOfWeek.Friday, "五" },
-                    { DayOfWeek.Saturday, "六" }
-                };
-
-                var latestLiveSets = (from livesetDate in db.LiveSettings
-                                      where livesetDate.LiveDate >= DateTime.Today
-                                      orderby livesetDate.LiveDate ascending
-                                      select livesetDate)
-                                      .Take(liveqty)
-                                      .ToList();
-
-                var liveProduct = from p in db.Products
-                                  join user in db.Users on p.UserId equals user.Id
-                                  join s in db.Specs on p.Id equals s.ProductId
-                                  join livepro in db.LiveProducts on s.Id equals livepro.SpecId
-                                  //join liveset in latestLiveSets on livepro.LiveSettingId equals liveset.Id
-                                  from liveset in db.LiveSettings.Where(ls => user.Id == ls.UserId).DefaultIfEmpty()
-                                  from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
-                                  let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
-                                  where p.ProductState && s != null && s.LivePrice.HasValue && s.LivePrice.Value != 0
-                                  orderby p.CreatTime descending
-                                  select new
-                                  {
-                                      productId = p.Id,
-                                      productTitle = p.ProductTitle,
-                                      livePrice = s.LivePrice,
-                                      farmerName = user.NickName,
-                                      //liveDate = liveset != null ? liveset.LiveDate.ToString("yyyy.MM.dd") + dayOfWeek[liveset.LiveDate.DayOfWeek] + liveset.StartTime.ToString("HH:mm") : "",
-                                      productImg = new
-                                      {
-                                          src = photo != null ? photo.URL : "default-src",
-                                          alt = p.ProductTitle
-                                      },
-                                      farmerImg = new
-                                      {
-                                          src = user.Photo != null ? user.Photo : "default-src",
-                                          alt = user.NickName
-                                      }
-                                  };
-
                 var topSaleProduct = (from p in db.Products
                                       join s in db.Specs on p.Id equals s.ProductId
                                       from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
@@ -279,8 +233,7 @@ namespace FarmerPro.Controllers
                         message = "取得成功",
                         data = new
                         {
-                            liveProduct = liveProduct.ToList(),
-                            hotSaleProduct = topSaleProduct.ToList(),
+                            topSaleProduct = topSaleProduct.ToList(),
                             promotionProduct = promotionProduct.ToList(),
                             fruitProduct = fruitProduct.ToList(),
                             vegetableProduct = vegetableProduct.ToList()
