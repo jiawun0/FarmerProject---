@@ -133,14 +133,14 @@ namespace FarmerPro.Controllers
                                        join s in db.Specs on p.Id equals s.ProductId
                                        from album in db.Albums.Where(a => p.Id == a.ProductId).DefaultIfEmpty()
                                        let photo = db.Photos.FirstOrDefault(ph => album != null && album.Id == ph.AlbumId)
-                                       where p.ProductState
+                                       where p.ProductState && !s.Size
                                        orderby p.CreatTime descending
                                        select new
                                        {
                                            productId = p.Id,
                                            productTitle = p.ProductTitle,
                                            farmerName = user.NickName,
-                                           origin = p.Origin,
+                                           origin = p.Origin.ToString(),
                                            smallOriginalPrice = s.Price,
                                            smallPromotionPrice = s.PromotePrice,
                                            productImg = new
@@ -155,10 +155,10 @@ namespace FarmerPro.Controllers
                                            }
                                        };
 
-                // 执行查询并将结果转换为列表
+                // 轉列表
                 var promotionProducts = promotionProduct.ToList();
 
-                // 在内存中随机排序并取前四条记录
+                // 隨機
                 var randomPromotionProducts = promotionProducts.OrderBy(x => Guid.NewGuid()).Take(promoteqty).ToList();
 
 
