@@ -341,9 +341,9 @@ namespace FarmerPro.Controllers
                     //result訊息
                     var result = new
                     {
-                        statusCode = 400,
+                        statusCode = 401,
                         status = "error",
-                        message = "取得失敗",
+                        message = "沒有此商品Id，請重新輸入",
                     };
                     return Content(HttpStatusCode.OK, result);
                 }
