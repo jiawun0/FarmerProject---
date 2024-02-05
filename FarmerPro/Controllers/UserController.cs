@@ -23,7 +23,7 @@ namespace FarmerPro.Controllers
         //第二步: 使用的CRUD方法+簡易判斷的方法
         //建立 POST: api/User
 
-        #region register
+        #region FCR-1 註冊
         [HttpPost]
         //自定義路由
         [Route("api/register")]
@@ -138,7 +138,7 @@ namespace FarmerPro.Controllers
         }
         #endregion
 
-
+        #region FCR-1 登入
         //第二支 POST: api/User
         [HttpPost]
         [Route("api/login/general")]
@@ -219,7 +219,40 @@ namespace FarmerPro.Controllers
                 }
             }
         }
+        #endregion
 
+        #region FCS-6 登出
+        [HttpPost]
+        [Route("api/logout")]
+        //使用 IHttpActionResult 作為返回 HTTP 回應類型
+        public IHttpActionResult Logout()
+        {
+            try
+            {
+                JwtAuthUtil jwtAuthUtil = new JwtAuthUtil();
+                string revokedToken = jwtAuthUtil.RevokeToken(); // ""
+
+                //result訊息
+                var result = new
+                {
+                    statusCode = 200,
+                    status = "success",
+                    message = "登出成功",
+                };
+                return Content(HttpStatusCode.OK, result);
+            }
+            catch
+            {
+                //result訊息
+                var result = new
+                {
+                    statusCode = 500,
+                    status = "error",
+                    message = "其他錯誤",
+                };
+                return Content(HttpStatusCode.OK, result);
+            }
+        }
         //注意，記得新增一個 account JSON class -> 資料表欄位
         public class login
         {
@@ -231,33 +264,7 @@ namespace FarmerPro.Controllers
             [MinLength(6)]
             public string password { get; set; }
         }
+        #endregion
 
-
-        //// GET: api/User
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
-
-        //// GET: api/User/5
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
-        //// POST: api/User
-        //public void Post([FromBody]string value)
-        //{
-        //}
-
-        //// PUT: api/User/5
-        //public void Put(int id, [FromBody]string value)
-        //{
-        //}
-
-        //// DELETE: api/User/5
-        //public void Delete(int id)
-        //{
-        //}
     }
 }
