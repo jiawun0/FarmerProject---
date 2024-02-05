@@ -100,8 +100,8 @@ namespace FarmerPro.Controllers
         [HttpGet]
         //自定義路由
         [Route("api/product")]
-        //[Route("api/product/{liveqty}/{topsalesqty}/{promoteqty}/{fruitqyt}/{vegatqty}")]
-        ///api/product?(liveqty=3)&(topsalesqty=6)&(promoteqty=4)&(fruitqyt)&(vegatqty)
+        //[Route("api/product/{topsalesqty}/{promoteqty}/{fruitqyt}/{vegatqty}")]
+        ///api/product?(topsalesqty=6)&(promoteqty=4)&(fruitqyt)&(vegatqty)
         //使用 IHttpActionResult 作為返回 HTTP 回應類型
 
         public IHttpActionResult productindex(int topsalesqty = 6, int promoteqty = 4, int fruitqty = 3, int vegatqty = 3)
@@ -416,8 +416,8 @@ namespace FarmerPro.Controllers
                     //result訊息
                     var result = new
                     {
-                        statusCode = 400,
-                        status = "error",
+                        statusCode = 200,
+                        status = "success",
                         message = "沒有結果",
                         data = new object[] { }
                     };
