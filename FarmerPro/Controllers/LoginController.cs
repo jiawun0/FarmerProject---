@@ -41,7 +41,7 @@ namespace FarmerPro.Controllers
                 }
                 else
                 {
-                    var IsUser = db.Users.Where(x => x.Account == input.account).FirstOrDefault();
+                    var IsUser = db.Users.Where(x => x.Account == input.account)?.FirstOrDefault();
                     if (IsUser == null)
                     {
                         var result = new
@@ -54,17 +54,14 @@ namespace FarmerPro.Controllers
                     }
                     else
                     {
-                        Guid passwordlessGUID = new Guid();
+                        Guid passwordlessGUID = Guid.NewGuid();
                         IsUser.EmailGUID = passwordlessGUID;
-                        db.SaveChanges();
+                        db.SaveChanges();    //產生guid並更新資料庫
 
-                        int timedifference = (DateTime.Now - new DateTime(1970, 01, 01)).Seconds;
+                        int timedifference = (int)(DateTime.Now - new DateTime(1970, 01, 01)).TotalSeconds;
                         string link = @"https://sun-live.vercel.app/" + $"?guid={passwordlessGUID}&account={IsUser.Account}&time={timedifference}";
-                        sendGmail(IsUser.Account, IsUser.NickName == null ? IsUser.Account : IsUser.NickName, link);
+                        sendGmail(IsUser.Account, IsUser.NickName == null ? IsUser.Account : IsUser.NickName, link);  //寄送認證信件
 
-                        // GenerateToken() 生成新 JwtToken 用法
-                        JwtAuthUtil jwtAuthUtil = new JwtAuthUtil();
-                        string jwtToken = jwtAuthUtil.GenerateToken(IsUser.Id, (int)IsUser.Category);
 
                         var result = new
                         {
@@ -73,7 +70,6 @@ namespace FarmerPro.Controllers
                             message = "郵件已寄送成功", 
                         };
                         return Content(HttpStatusCode.OK, result);
-
                     }
                 }
             }
@@ -111,7 +107,7 @@ namespace FarmerPro.Controllers
                 }
                 else 
                 {
-                    var IsUser = db.Users.Where(x => x.Account == input.account && x.EmailGUID.ToString() == input.guid).FirstOrDefault();
+                    var IsUser = db.Users.Where(x => x.Account == input.account && x.EmailGUID.ToString() == input.guid)?.FirstOrDefault();
                     if (IsUser == null)
                     {
                         var result = new
@@ -125,12 +121,12 @@ namespace FarmerPro.Controllers
                     else 
                     {
                         DateTime check = new DateTime(1970, 01, 01).AddSeconds(Convert.ToInt64(input.time));
-                        int timecheck = (DateTime.Now - check).Seconds;
-                        if (timecheck > 180)
+                        int timecheck = (int)(DateTime.Now - check).TotalSeconds;
+                        if (timecheck > 300) //如果大於300秒鐘
                         {
                             var result = new
                             {
-                                statusCode = 401,
+                                statusCode = 402,
                                 status = "error",
                                 message = "驗證超時，請重新進行驗證步驟",
                             };
@@ -139,13 +135,13 @@ namespace FarmerPro.Controllers
                         else 
                         {
                             JwtAuthUtil jwtAuthUtil = new JwtAuthUtil();
-                            string jwtToken = jwtAuthUtil.GenerateToken(IsUser.Id, (int)IsUser.Category);
+                            string jwtToken = jwtAuthUtil.GenerateToken(IsUser.Id, (int)IsUser.Category); //生成新的TOKEN
 
                             var result = new
                             {
                                 statusCode = 200,
                                 status = "success",
-                                message = "登入成功", // token失效時間:一天
+                                message = "驗證成功", // token失效時間:一天
                                 data = new
                                 {
                                     id = IsUser.Id,
@@ -204,7 +200,7 @@ namespace FarmerPro.Controllers
                 $"<h3>{name}，您好：</h3>" +
                 $"<h3>請點選下方連結進行無密碼驗證登入：</h3>" +
                 $"<h3>{link}</h3>" +
-                $"<h3>請留意，上方連結僅於三分鐘內點選有效</h3>";
+                $"<h3>請留意，上方連結僅於五分鐘內點選有效</h3>";
             //$"<p>{Comments.Text.Trim()}</p>";
             //設定郵件內容
             message.Body = bodyBuilder.ToMessageBody(); //轉成郵件內容格式
@@ -241,6 +237,7 @@ namespace FarmerPro.Controllers
         [RegularExpression(@"^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")]
         public string account { get; set; }
 
+        [Required]
         [Display(Name = "無密碼驗證之GUID")]
         public string guid { get; set; }
 

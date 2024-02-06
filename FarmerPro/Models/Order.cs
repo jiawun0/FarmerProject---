@@ -24,7 +24,7 @@ namespace FarmerPro.Models
         [Required]
         [Display(Name = "電話")]
         [MaxLength(100)]
-        public string Photo { get; set; }
+        public string Phone { get; set; }
 
         [Required]
         [Display(Name = "城市")]
@@ -57,6 +57,22 @@ namespace FarmerPro.Models
         [Display(Name = "藍新繳費時間")]
         public DateTime? PaymentTime { get; set; }
 
+        [Display(Name = "藍新繳費狀態")]
+        public bool? IsPay { get; set; }
+
+        [Display(Name = "藍新欄位1")]
+        [MaxLength(100)]
+        public string MerchantID { get; set; }
+
+        [Display(Name = "藍新欄位2")]
+        public string TradeInfo { get; set; }
+
+        [Display(Name = "藍新欄位3")]
+        public string TradeSha { get; set; }
+
+        [MaxLength(20)]
+        [Display(Name = "藍新欄位4")]
+        public string Version { get; set; }
 
         [Display(Name = "建立時間")]
         public DateTime CreatTime { get; set; } = DateTime.Now;

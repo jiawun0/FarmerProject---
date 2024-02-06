@@ -43,20 +43,14 @@ namespace FarmerPro.Models.ViewModel
         public string address { get; set; }
 
         [Display(Name = "購物車清單")]
-        public List<CartItem> cartList { get; set; }
+        public List<OrderItem> cartList { get; set; }
     }
 
-    public class CartItem
+    public class OrderItem
     {
         [Display(Name = "產品ID")]
         public int productId { get; set; }
 
-        [Required]
-        [Display(Name = "產品名稱")]
-        public string productName { get; set; }
-
-        [Display(Name = "尺寸")]
-        public bool size { get; set; }
 
         [Display(Name = "數量")]
         public int qty { get; set; }

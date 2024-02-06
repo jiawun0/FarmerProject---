@@ -10,39 +10,45 @@ namespace FarmerPro.Models.ViewModel
 {
     public class CreateNewLiveSetting
     {
+        [Display(Name = "直播Id")]
+        public int liveId { get; set; }
 
         [Required]
         [MaxLength(100)]
         [Display(Name = "直播名稱")]
         public string liveName { get; set; }
 
+
         [Display(Name = "直播日期")]
+        [DataType(DataType.Date)]
         public DateTime liveDate { get; set; }
 
         [Display(Name = "開始時間")]
+        [DataType(DataType.Time)]
         public TimeSpan startTime { get; set; }
 
         [Display(Name = "結束時間")]
+        [DataType(DataType.Time)]
         public TimeSpan endTime { get; set; }
 
         [Display(Name = "直播圖片")]
-        public string livePic { get; set; }   //Figma好像缺乏這個欄位
+        public string livePic { get; set; }    
 
         [Required]
         [Display(Name = "YT直播網址")]   //可以加入網址的正規表達式
         public string yturl { get; set; }
 
         [Display(Name = "直播產品")]//其他表-外鍵
-        public List<CreateNewLiveProudct> liveproudct { get; set; }
+        public List<CreateNewLiveProudct> liveproduct { get; set; }
     }
 
     public class CreateNewLiveProudct
     {
         [Display(Name = "產品Id")]//其他表-外鍵
-        public int prodcutId { get; set; }
+        public int productId { get; set; }
 
         [Display(Name = "產品尺寸")]//其他表-外鍵
-        public int productSize { get; set; }
+        public bool productSize { get; set; }
 
         [Display(Name = "直播價格")]//其他表-外鍵
         public int liveprice { get; set; }

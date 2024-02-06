@@ -21,6 +21,8 @@ using SixLabors.ImageSharp.PixelFormats;
 using System.Security.Policy;
 using static System.Net.WebRequestMethods;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using System.Web.Http.Results;
+using System.Web.Configuration;
 
 
 namespace FarmerPro.Controllers
@@ -29,49 +31,68 @@ namespace FarmerPro.Controllers
     {
         private FarmerProDB db = new FarmerProDB();
 
-
         #region BFP-01 取得小農單一商品資料(有包含相片)
         [HttpGet]
         [Route("api/farmer/product")]
         [JwtAuthFilter]
-        public IHttpActionResult GetSingleFarmerProduct([FromUri] int productId)
+        public IHttpActionResult GetSingleFarmerProduct([FromUri] int Id)
         {
-            try
+            //try
+            //{
+            //先取得小農Id
+            int farmerId = Convert.ToInt16(JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter)["Id"]);
+            var SingleProduct = db.Products.Where(x => x.Id == Id)?.FirstOrDefault();
+            if (SingleProduct != null)
             {
-                //先驗證取得小農ID和產品ID
-                //沒有用到
-                int farmerId = Convert.ToInt16(JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter)["Id"]); 
-                var SingleProduct = db.Products.Where(x => x.Id == productId).FirstOrDefault();
-                var SingleProductLarge = db.Specs.Where(x => x.Size == true && x.ProductId == SingleProduct.Id).FirstOrDefault();
-                var SingleProductSmall = db.Specs.Where(x => x.Size == false && x.ProductId == SingleProduct.Id).FirstOrDefault();
-                var ProductPhoto = db.Albums.Where(x => x.ProductId == SingleProduct.Id).FirstOrDefault().Photo;
+                var SingleProductLarge = db.Specs.Where(x => x.Size ==true && x.ProductId == SingleProduct.Id)?.FirstOrDefault();
+                var SingleProductSmall = db.Specs.Where(x => x.Size==false && x.ProductId == SingleProduct.Id)?.FirstOrDefault();
+                var ProductPhoto = db.Albums.Where(x => x.ProductId == SingleProduct.Id).FirstOrDefault()?.Photo;
 
-                var result = new
+                //如果產品id=0，刪除相簿=>這可能要獨立一隻API
+                var linkProductandAlbum = db.Albums.Where(x => x.UserId == farmerId && x.ProductId == 0)?.FirstOrDefault();
+                if (linkProductandAlbum != null)
+                {
+                        //刪除實體資料夾的東西
+                        string root = HttpContext.Current.Server.MapPath($"~/upload/farmer/{linkProductandAlbum.UserId}/{linkProductandAlbum.Id}"); //建立假的ID
+                        if (Directory.Exists(root))
+                        {
+                            Directory.Delete(root, true);
+                        }
+
+                        //刪除 linkProductandAlbum-資料庫資料
+                        db.Albums.Remove(linkProductandAlbum);
+                        db.SaveChanges();
+                }
+                   
+
+
+                    var result = new
                 {
                     statusCode = 200,
                     status = "success",
                     message = "取得成功",
                     data = new
                     {
-                        productId = SingleProduct.Id,
-                        productTitle = SingleProduct.ProductTitle,
-                        category = SingleProduct.Category,
-                        period = SingleProduct.Period,
-                        origin = SingleProduct.Origin,
-                        storage = SingleProduct.Storage,
-                        description = SingleProduct.Description,
-                        introduction = SingleProduct.Introduction,
-                        productState = SingleProduct.ProductState,
-                        largeOriginalPrice = SingleProductLarge.Price,
-                        largePromotionPrice = SingleProductLarge.PromotePrice,
-                        largeWeight = SingleProductLarge.Weight,
-                        largeStock = SingleProductLarge.Stock,
-                        smallOriginalPrice = SingleProductSmall.Price,
-                        smallPromotionPrice = SingleProductSmall.PromotePrice,
-                        smallWeight = SingleProductSmall.Weight,
-                        smallStock = SingleProductSmall.Stock,
-                        photos = ProductPhoto.Select(pic => new
+                        productId = SingleProduct?.Id,
+                        productTitle = SingleProduct?.ProductTitle,
+                        category = SingleProduct?.Category.ToString(),
+                        period = SingleProduct?.Period.ToString(),
+                        origin = SingleProduct?.Origin.ToString(),
+                        storage = SingleProduct?.Storage.ToString(),
+                        description = SingleProduct?.Description,
+                        introduction = SingleProduct?.Introduction,
+                        productState = SingleProduct?.ProductState,
+                        largeOriginalPrice = SingleProductLarge?.Price,
+                        largePromotionPrice = SingleProductLarge?.PromotePrice,
+                        largeWeight = SingleProductLarge?.Weight,
+                        largeStock = SingleProductLarge?.Stock,
+                        smallOriginalPrice = SingleProductSmall?.Price,
+                        smallPromotionPrice = SingleProductSmall?.PromotePrice,
+                        smallWeight = SingleProductSmall?.Weight,
+                        smallStock = SingleProductSmall?.Stock,
+                        photos = ProductPhoto?.Select(pic => new
                         {
+                            photoId= pic.Id,
                             src = pic.URL,
                             alt = SingleProduct.ProductTitle.ToString() + pic.Id.ToString(),
                         }).ToList(),
@@ -79,16 +100,28 @@ namespace FarmerPro.Controllers
                 };
                 return Content(HttpStatusCode.OK, result);
             }
-            catch 
+            else
             {
                 var result = new
                 {
-                    statusCode = 500,
+                    statusCode = 401,
                     status = "error",
-                    message = "其他錯誤",
+                    message = "產品Id不存在",
                 };
                 return Content(HttpStatusCode.OK, result);
             }
+
+            //}
+            //catch
+            //{
+            //    var result = new
+            //    {
+            //        statusCode = 500,
+            //        status = "error",
+            //        message = "其他錯誤",
+            //    };
+            //    return Content(HttpStatusCode.OK, result);
+            //}
         }
 
         #endregion
@@ -113,7 +146,8 @@ namespace FarmerPro.Controllers
                 }
                 else
                 {
-                    //要確認上傳者
+                    //先取得小農Id
+                    int farmerId = Convert.ToInt16(JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter)["Id"]);
                     var HasProduct = db.Products.Where(x => x.ProductTitle == CreateProduct.productTitle).FirstOrDefault();
                     if (HasProduct != null)
                     {
@@ -138,10 +172,20 @@ namespace FarmerPro.Controllers
                             Introduction = CreateProduct.introduction,
                             ProductState = CreateProduct.productState,
                             UpdateStateTime = CreateProduct.productState == false ? (DateTime?)null : CreateProduct.updateStateTime,
+                            UserId= farmerId,
                         };
                         db.Products.Add(newproduct);
                         db.SaveChanges();
                         int newProductId = newproduct.Id;
+
+                        //鏈結產品和相簿
+                        var linkProductandAlbum = db.Albums.Where(x => x.UserId == farmerId && x.ProductId == 0)?.FirstOrDefault();
+                        if (linkProductandAlbum != null) 
+                        {
+                            linkProductandAlbum.ProductId = newproduct.Id;
+                            db.SaveChanges();
+                        }
+
 
                         var newproductsmall = new Spec // 加入小產品Spec
                         {
@@ -184,10 +228,10 @@ namespace FarmerPro.Controllers
                             {
                                 productId = CreateNewProduct.Id,
                                 productTitle = CreateNewProduct.ProductTitle,
-                                category = CreateNewProduct.Category,
-                                period = CreateNewProduct.Period,
-                                origin = CreateNewProduct.Origin,
-                                storage = CreateNewProduct.Storage,
+                                category = CreateNewProduct.Category.ToString(),
+                                period = CreateNewProduct.Period.ToString(),
+                                origin = CreateNewProduct.Origin.ToString(),
+                                storage = CreateNewProduct.Storage.ToString(),
                                 description = CreateNewProduct.Description,
                                 introduction = CreateNewProduct.Introduction,
                                 productState = CreateNewProduct.ProductState,
@@ -239,17 +283,26 @@ namespace FarmerPro.Controllers
                     throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
                 }
 
-                var newalbum = new Album // 建立相簿
+                var checkalbum=db.Albums.Where(x=>x.UserId== FarmerId&& x.ProductId==0)?.FirstOrDefault();
+                int AlbumIdCreate;
+                if (checkalbum == null)
                 {
-                    ProductId = 0, //初始化相簿ID而已，這個ProductId要改
-        //UserId= FarmerId,//要再User Model加入一個UserId，才能鏈結!!!
-                };
-                db.Albums.Add(newalbum);
-                db.SaveChanges();
-                int AlbumId = newalbum.Id;
+                    var newalbum = new Album // 建立相簿
+                    {
+                        ProductId = 0, //初始化相簿ID而已，這個ProductId後續要再改
+                        UserId = FarmerId //UserId= FarmerId,才能鏈結!!!
+                    };
+                    db.Albums.Add(newalbum);
+                    db.SaveChanges();
+                    AlbumIdCreate = newalbum.Id;
+                }
+                else 
+                {
+                    AlbumIdCreate = checkalbum.Id;
+                }
 
-                // 檢查資料夾是否存在，若無則建立
-                string root = HttpContext.Current.Server.MapPath($"~/upload/farmer/{FarmerId}/{AlbumId}"); //建立假的ID
+            // 檢查資料夾是否存在，若無則建立
+            string root = HttpContext.Current.Server.MapPath($"~/upload/farmer/{FarmerId}/{AlbumIdCreate}"); 
                 if (!Directory.Exists(root))
                 {
                     Directory.CreateDirectory(root);
@@ -261,17 +314,56 @@ namespace FarmerPro.Controllers
                     var provider = new MultipartMemoryStreamProvider();
                     await Request.Content.ReadAsMultipartAsync(provider);
 
-                    List<string> imglList = new List<string>();
-
-                    //遍歷 provider.Contents 中的每個 content，處理多個圖片檔案
-                    foreach (var content in provider.Contents)
+                foreach (var content in provider.Contents) //檢查附檔名類型
+                {
+                    string fileNameData = content.Headers.ContentDisposition.FileName.Trim('\"');
+                    string fileType = fileNameData.Remove(0, fileNameData.LastIndexOf('.')).ToLower(); // .jpg
+                    if (fileType != ".jpg" && fileType != ".jpeg" && fileType != ".png") 
                     {
+                        var resultfileType = new
+                        {
+                            statusCode = 400,
+                            status = "error",
+                            message = "上傳失敗，請確認圖檔格式",
+                        };
+                        return Content(HttpStatusCode.OK, resultfileType);
+                    }
+                }
+
+                //檢查上傳數量
+                var photoNumberCheck = db.Photos.Where(x => x.AlbumId == AlbumIdCreate)?.Count();
+                if (photoNumberCheck != null && (photoNumberCheck+ provider.Contents.Count)>5) 
+                {
+                    var resultfileType = new
+                    {
+                        statusCode = 401,
+                        status = "error",
+                        message = "上傳失敗，請確認上傳圖片數量",
+                    };
+                    return Content(HttpStatusCode.OK, resultfileType);
+                }
+                else if(photoNumberCheck==null && provider.Contents.Count>5)
+                {
+                    var resultfileType = new
+                    {
+                        statusCode = 401,
+                        status = "error",
+                        message = "上傳失敗，請確認上傳圖片數量",
+                    };
+                    return Content(HttpStatusCode.OK, resultfileType);
+                }
+
+                    List<List<string>> imglList = new List<List<string>>();
+                //遍歷 provider.Contents 中的每個 content，處理多個圖片檔案
+                foreach (var content in provider.Contents)
+                    {
+                         List<string> imgdetail = new List<string>();
                         // 取得檔案副檔名
                         string fileNameData = content.Headers.ContentDisposition.FileName.Trim('\"');
                         string fileType = fileNameData.Remove(0, fileNameData.LastIndexOf('.')); // .jpg
 
                         // 定義檔案名稱
-                        string fileName = FarmerId.ToString()+AlbumId.ToString() + DateTime.Now.ToString("yyyyMMddHHmmssfff") + fileType;
+                        string fileName = FarmerId.ToString() + AlbumIdCreate.ToString() + DateTime.Now.ToString("yyyyMMddHHmmssfff") + fileType;
 
                         // 儲存圖片
                         var fileBytes = await content.ReadAsByteArrayAsync();
@@ -325,31 +417,38 @@ namespace FarmerPro.Controllers
                             image.Save(outputPath);
                         }
 
-                        //加入至List
-                        imglList.Add(fileName);
-                    }
+                    //加入至List
+                    //imglList.Add(fileName);
+                    imgdetail.Add(fileName);
+                    string url = WebConfigurationManager.AppSettings["Serverurl"].ToString() + $"/upload/farmer/{FarmerId}/{AlbumIdCreate}/" + fileName;
+                    imgdetail.Add(url);
+                    string albumId = AlbumIdCreate.ToString();
+                    imgdetail.Add(albumId);
+                    imglList.Add(imgdetail);
+                }
 
                     //將相片加入資料庫
-                    var newPhotos = imglList.Select(img => new Photo
-                    {
-                        URL = @"http://4.224.41.94/api/farmer/" + img.ToString(),
-                        AlbumId = AlbumId,
+                    var newPhotos = imglList.Select(imgs => new Photo
+                    {  
+                        URL = imgs[1],
+                        AlbumId = Convert.ToInt16(imgs[2]) //這邊有問題
                     }).ToList();
                     db.Photos.AddRange(newPhotos);
                     db.SaveChanges();
-
+              
                     //撈取相片資料庫
-                    var uploadedPhotos = db.Photos.Where(x => x.AlbumId == AlbumId);
+                    var uploadedPhotos = db.Photos.Where(x => x.AlbumId == AlbumIdCreate).AsEnumerable();
 
                     var result = new
                     {
                         statusCode = 200,
                         status = "success",
                         message = "上傳成功",
-                        data = uploadedPhotos.Select(x => new 
-                        { 
-                            src=x.URL,
-                            alt=x.URL.Substring(x.URL.LastIndexOf('/')),
+                        data = uploadedPhotos.Select(x => new
+                        {
+                            photoId=x.Id,
+                            src = x.URL,
+                            alt = x.URL.Substring(x.URL.LastIndexOf('/')+1),
                         }).ToList(),
                     };
                     return Content(HttpStatusCode.OK, result);
@@ -379,8 +478,8 @@ namespace FarmerPro.Controllers
             }
         }
         #endregion
-        //需要再補上圖片put和delete的API
-
+        //需要再補上圖片delete的API
+        //可能要獨立一隻API，空白表單讀取get時候，清空之前的暫存相簿
 
     }
 

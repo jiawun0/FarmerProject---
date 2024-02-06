@@ -23,11 +23,11 @@ namespace FarmerPro.Controllers
         [HttpPost]
         [Route("api/order/")]
         [JwtAuthFilter]
-        public IHttpActionResult CreateNewOrder([FromBody] CreateNewOrder input)  //只有驗證部分資訊可能會錯
+        public IHttpActionResult CreateNewOrder([FromBody] CreateNewOrder input) 
         {
             try
             {
-                //先驗證取得使用者ID
+                //取得使用者ID
                 int CustomerId = Convert.ToInt16(JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter)["Id"]);
                 if (!ModelState.IsValid)
                 {
@@ -41,17 +41,16 @@ namespace FarmerPro.Controllers
                 }
                 else
                 {
-
                     var newOrder = new Order
                     {
                         Receiver = input.receiver,
-                        Photo = input.phone,    //這個model要改名稱,
+                        Phone = input.phone,           //這個model要改名稱=>Done
                         City = input.city,
-                        District = input.district,
-                        ZipCode = input.zipCode,
+                        District = input.district,          //信任前端資料，未來可以調整
+                        ZipCode = input.zipCode,    //信任前端資料，未來可以調整
                         Address = input.address,
-                        DeliveryFee = 100,
-                        OrderSum = input.orderSum,
+                        DeliveryFee = 100,                    //前端是否要傳?
+                        OrderSum = input.orderSum,   //這邊為包含運費的總價
                         Shipment = false,
                         Guid = Guid.NewGuid(),
                         UserId = CustomerId,
@@ -72,10 +71,9 @@ namespace FarmerPro.Controllers
                     db.OrderDetails.AddRange(newOrderDetail);
                     db.SaveChanges();
 
-
                     foreach (var cartItem in input.cartList)
                     {
-                        var specToUpdate = db.Specs.SingleOrDefault(x => x.Id == cartItem.specId);
+                        var specToUpdate = db.Specs.Where(x => x.Id == cartItem.specId)?.FirstOrDefault();
 
                         if (specToUpdate != null)
                         {
@@ -98,12 +96,12 @@ namespace FarmerPro.Controllers
                     string merchantID = "MS151432737";
                     string tradeInfo = "";
                     string tradeSha = "";
-                    string version = "2.0"; // 參考文件串接程式版本  //不確定
+                    string version = "2.0"; // 參考文件串接程式版本  //不確定，先設定2.0
 
                     // tradeInfo 內容，導回的網址都需為 https 
                     string respondType = "JSON"; // 回傳格式
                     string timeStamp = ((int)(DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds).ToString();
-                    string merchantOrderNo = timeStamp + "_" + "訂單ID"; // 底線後方為訂單ID，解密比對用，不可重覆(規則參考文件)
+                    string merchantOrderNo = timeStamp + "_" + OrderID.ToString();//"訂單ID"; // 底線後方為訂單ID，解密比對用，不可重覆(規則參考文件)
                     string amt = input.orderSum.ToString();//"訂單金額";
                     string itemDesc = OrderID.ToString(); //"商品資訊";
                     string tradeLimit = "600"; // 交易限制秒數
@@ -135,6 +133,18 @@ namespace FarmerPro.Controllers
                     // SHA256 加密
                     tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
 
+                    //將藍新資料送入資料庫
+
+                    var updateBlueNewData=db.Orders.Where(x=>x.Id== OrderID)?.FirstOrDefault();
+                    if (updateBlueNewData != null) 
+                    {
+                        updateBlueNewData.MerchantID=merchantID;
+                        updateBlueNewData.TradeInfo=tradeInfo;
+                        updateBlueNewData.TradeSha=tradeSha;
+                        updateBlueNewData.Version=version;
+                        db.SaveChanges();
+                    }
+
 
                     var result = new
                     {
@@ -150,7 +160,6 @@ namespace FarmerPro.Controllers
                         }
                     };
                     return Content(HttpStatusCode.OK, result);
-
                 }
             }
             catch
@@ -170,7 +179,7 @@ namespace FarmerPro.Controllers
         #region FCO-2 藍新回送付款狀態(金流已付款)
         [HttpPost]
         [Route("api/order/payment")]
-        // JwtAuthFilter 應該不用驗證
+        // JwtAuthFilter 不用驗證
         public IHttpActionResult BlueReturnOrderState([FromBody] NewebPayReturn data)
         {
             try
@@ -199,10 +208,15 @@ namespace FarmerPro.Controllers
                     string[] orderNo = result.Result.MerchantOrderNo.Split('_');
                     int logId = Convert.ToInt32(orderNo[1]);
 
-                    var changePayState = db.Orders.Where(x => x.Id == logId).FirstOrDefault();
-                    changePayState.PaymentTime = DateTime.Now;   //好像少了一個欄位，IsPay=>Order欄位
-                    db.SaveChanges();
-                    // 用取得的"訂單ID"修改資料庫此筆訂單的付款狀態為 true
+                    var changePayState = db.Orders.Where(x => x.Id == logId)?.FirstOrDefault();
+                    if (changePayState != null) 
+                    {
+                        changePayState.PaymentTime = DateTime.Now;   //好像少了一個欄位，IsPay=>Order欄位
+                        changePayState.IsPay = true;
+                        db.SaveChanges();
+                    }
+                    //藍新交易紀錄目前沒有存在資料庫內，後續可以考慮新增
+
 
                     var result2 = new
                     {

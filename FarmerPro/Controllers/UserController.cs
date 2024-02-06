@@ -30,8 +30,8 @@ namespace FarmerPro.Controllers
         //使用 IHttpActionResult 作為返回 HTTP 回應類型
         public IHttpActionResult register([FromBody] Register input)
         {
-            try
-            {
+            //try
+            //{
                 if (!ModelState.IsValid)
                 {
                     //result訊息
@@ -46,7 +46,7 @@ namespace FarmerPro.Controllers
                 else
                 {
                     string accountCheck = input.account;
-                    var Isregister = db.Users.Where(ac => ac.Account == accountCheck).FirstOrDefault();
+                    var Isregister = db.Users.Where(ac => ac.Account == accountCheck)?.FirstOrDefault();
                     if (Isregister != null)
                     {
                         //result訊息
@@ -95,18 +95,18 @@ namespace FarmerPro.Controllers
 
                 }
 
-            }
-            catch
-            {
-                //result訊息
-                var result = new
-                {
-                    statusCode = 500,
-                    status = "error",
-                    message = "其他錯誤",
-                };
-                return Content(HttpStatusCode.OK, result);
-            }
+            //}
+            //catch
+            //{
+            //    //result訊息
+            //    var result = new
+            //    {
+            //        statusCode = 500,
+            //        status = "error",
+            //        message = "其他錯誤",
+            //    };
+            //    return Content(HttpStatusCode.OK, result);
+            //}
         }
 
         // Argon2 加密

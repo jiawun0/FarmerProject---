@@ -5,7 +5,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Users\user\Desktop\FPJ\FarmerProject---\FarmerPro\bin\app.publish\</_PublishTargetUrl>
-    <History>True|2024-02-02T07:54:25.9488404Z;True|2024-02-02T15:50:30.1278496+08:00;True|2024-02-02T15:39:26.2657468+08:00;False|2024-02-02T15:35:53.5388683+08:00;False|2024-02-02T15:35:27.7591890+08:00;False|2024-02-02T15:35:23.0586823+08:00;True|2024-02-02T11:59:14.2352464+08:00;True|2024-02-01T15:42:35.4904405+08:00;True|2024-02-01T09:22:22.5055332+08:00;True|2024-02-01T09:22:15.0187503+08:00;True|2024-01-31T17:53:50.4320968+08:00;</History>
+    <History>True|2024-02-05T02:32:07.4642926Z;True|2024-02-02T15:54:25.9488404+08:00;True|2024-02-02T15:50:30.1278496+08:00;True|2024-02-02T15:39:26.2657468+08:00;False|2024-02-02T15:35:53.5388683+08:00;False|2024-02-02T15:35:27.7591890+08:00;False|2024-02-02T15:35:23.0586823+08:00;True|2024-02-02T11:59:14.2352464+08:00;True|2024-02-01T15:42:35.4904405+08:00;True|2024-02-01T09:22:22.5055332+08:00;True|2024-02-01T09:22:15.0187503+08:00;True|2024-01-31T17:53:50.4320968+08:00;</History>
     <LastFailureDetails />
   </PropertyGroup>
   <ItemGroup>
@@ -78,6 +78,9 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
     <File Include="bin/Antlr3.Runtime.pdb">
       <publishTime>09/11/2013 00:29:20</publishTime>
     </File>
+    <File Include="bin/BouncyCastle.Cryptography.dll">
+      <publishTime>04/21/2023 20:07:22</publishTime>
+    </File>
     <File Include="bin/EntityFramework.dll">
       <publishTime>04/17/2020 04:38:42</publishTime>
     </File>
@@ -85,10 +88,10 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>04/17/2020 04:38:56</publishTime>
     </File>
     <File Include="bin/FarmerPro.dll">
-      <publishTime>02/02/2024 15:54:25</publishTime>
+      <publishTime>02/05/2024 10:32:05</publishTime>
     </File>
     <File Include="bin/FarmerPro.pdb">
-      <publishTime>02/02/2024 15:54:25</publishTime>
+      <publishTime>02/05/2024 10:32:05</publishTime>
     </File>
     <File Include="bin/jose-jwt.dll">
       <publishTime>12/03/2022 00:38:22</publishTime>
@@ -99,11 +102,29 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
     <File Include="bin/Konscious.Security.Cryptography.Blake2.dll">
       <publishTime>05/20/2022 10:37:32</publishTime>
     </File>
+    <File Include="bin/MailKit.dll">
+      <publishTime>11/12/2023 03:25:24</publishTime>
+    </File>
+    <File Include="bin/MailKit.dll.config">
+      <publishTime>11/12/2023 03:25:22</publishTime>
+    </File>
+    <File Include="bin/MailKit.pdb">
+      <publishTime>11/12/2023 03:25:24</publishTime>
+    </File>
     <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
       <publishTime>09/06/2018 00:10:50</publishTime>
     </File>
     <File Include="bin/Microsoft.Web.Infrastructure.dll">
       <publishTime>05/28/2022 07:39:10</publishTime>
+    </File>
+    <File Include="bin/MimeKit.dll">
+      <publishTime>11/12/2023 03:07:00</publishTime>
+    </File>
+    <File Include="bin/MimeKit.dll.config">
+      <publishTime>11/12/2023 03:06:58</publishTime>
+    </File>
+    <File Include="bin/MimeKit.pdb">
+      <publishTime>11/12/2023 03:07:00</publishTime>
     </File>
     <File Include="bin/Newtonsoft.Json.dll">
       <publishTime>04/22/2019 09:06:16</publishTime>
@@ -255,11 +276,17 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
     <File Include="bin/roslyn/VBCSCompiler.exe.config">
       <publishTime>08/08/2018 20:18:16</publishTime>
     </File>
+    <File Include="bin/SixLabors.ImageSharp.dll">
+      <publishTime>02/07/2022 20:34:44</publishTime>
+    </File>
     <File Include="bin/System.Buffers.dll">
       <publishTime>02/19/2020 18:05:18</publishTime>
     </File>
+    <File Include="bin/System.Formats.Asn1.dll">
+      <publishTime>10/19/2022 00:23:18</publishTime>
+    </File>
     <File Include="bin/System.Memory.dll">
-      <publishTime>02/19/2020 18:05:18</publishTime>
+      <publishTime>05/08/2022 11:31:02</publishTime>
     </File>
     <File Include="bin/System.Net.Http.Formatting.dll">
       <publishTime>05/28/2022 07:41:34</publishTime>
@@ -268,7 +295,16 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>05/15/2018 21:29:44</publishTime>
     </File>
     <File Include="bin/System.Runtime.CompilerServices.Unsafe.dll">
-      <publishTime>02/19/2020 18:05:16</publishTime>
+      <publishTime>10/23/2021 07:40:18</publishTime>
+    </File>
+    <File Include="bin/System.Text.Encoding.CodePages.dll">
+      <publishTime>10/20/2020 02:46:44</publishTime>
+    </File>
+    <File Include="bin/System.Threading.Tasks.Extensions.dll">
+      <publishTime>02/19/2020 18:05:18</publishTime>
+    </File>
+    <File Include="bin/System.ValueTuple.dll">
+      <publishTime>05/15/2018 21:29:52</publishTime>
     </File>
     <File Include="bin/System.Web.Helpers.dll">
       <publishTime>05/28/2022 07:41:54</publishTime>
@@ -508,7 +544,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>02/02/2024 15:11:25</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>02/02/2024 15:39:25</publishTime>
+      <publishTime>02/05/2024 10:32:06</publishTime>
     </File>
   </ItemGroup>
 </Project>
