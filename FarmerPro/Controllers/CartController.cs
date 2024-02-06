@@ -174,25 +174,26 @@ namespace FarmerPro.Controllers
                     db.CartItems.Add(addcartitem);
                     db.SaveChanges();
 
-                    var cartItemInfo = db.CartItems.Where(c => c.Cart.UserId == CustomerId)
-                                               .Select(cartItem => new
+                    var cartItemInfo = db.CartItems.Where(c => c.Cart.UserId == CustomerId).GroupBy(gruop=> gruop.SpecId)
+                                               .Select(cartItemGruop => new
                                                {
-                                                   productId = cartItem.Spec.ProductId,
-                                                   productTitle = cartItem.Spec.Product.ProductTitle, // Spec--Product--Title
-                                                   productSpecId = cartItem.Spec.Id,
-                                                   productSpecSize = cartItem.Spec.Size,
-                                                   productSpecWeight = (int)cartItem.Spec.Weight,
-                                                   cartItemOriginalPrice = cartItem.Spec.Price,
-                                                   cartItemPromotionPrice = cartItem.Spec.PromotePrice,
-                                                   cartItemQty = cartItem.Qty,
-                                                   subtotal = cartItem.Qty * cartItem.Spec.PromotePrice,
+                                                   productId = cartItemGruop.FirstOrDefault().Spec.ProductId,
+                                                   productTitle = cartItemGruop.FirstOrDefault().Spec.Product.ProductTitle, // Spec--Product--Title
+                                                   productSpecId = cartItemGruop.Key,
+                                                   productSpecSize = cartItemGruop.FirstOrDefault().Spec.Size,
+                                                   productSpecWeight = (int)cartItemGruop.FirstOrDefault().Spec.Weight,
+                                                   cartItemOriginalPrice = cartItemGruop.FirstOrDefault().Spec.Price,
+                                                   cartItemPromotionPrice = cartItemGruop.FirstOrDefault().Spec.PromotePrice,
+                                                   cartItemQty = cartItemGruop.FirstOrDefault().Qty,
+                                                   subtotal = cartItemGruop.FirstOrDefault().Qty * cartItemGruop.FirstOrDefault().Spec.PromotePrice,
                                                    productImg = new
                                                    {
-                                                       src = db.Albums.Where(a => a.ProductId == cartItem.Spec.ProductId).FirstOrDefault().Photo.FirstOrDefault().URL ?? "default-src",
-                                                       alt = cartItem.Spec.Product.ProductTitle,
+                                                       src = db.Albums.Where(a => a.ProductId == cartItemGruop.FirstOrDefault().Spec.ProductId).FirstOrDefault().Photo.FirstOrDefault().URL ?? "default-src",
+                                                       alt = cartItemGruop.FirstOrDefault().Spec.Product.ProductTitle,
                                                    },
                                                }).ToList();
 
+                    var cartItemQtySum = cartItemInfo.Sum(ci => ci.cartItemQty);
 
                     if (!cartItemInfo.Any())
                     {
@@ -214,8 +215,13 @@ namespace FarmerPro.Controllers
                         {
                             statusCode = 200,
                             status = "success",
-                            message = "新增成功",
-                            data = cartItemInfo
+                            message = "加入成功",
+                            data = new 
+                            {
+                                cartItemQtySum,
+                                cartItemInfo
+                            }
+                            
                         };
                         return Content(HttpStatusCode.OK, result);
                     }
@@ -238,9 +244,6 @@ namespace FarmerPro.Controllers
 
         public class GetCartItemClass
         {
-            [Display(Name = "農產品編號")]
-            public int productId { get; set; }
-
             [Display(Name = "規格spec編號")]
             public int productSpecId { get; set; }
 

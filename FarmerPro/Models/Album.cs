@@ -21,6 +21,6 @@ namespace FarmerPro.Models
         [Display(Name = "建立時間")]
         public DateTime CreatTime { get; set; } = DateTime.Now;
 
-        public virtual ICollection<Photo> Photo { get; set; }
+        public virtual ICollection<Photo> Photo { get; }
     }
 }
